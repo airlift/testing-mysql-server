@@ -43,8 +43,7 @@ public class TestTestingMySqlServer
             assertEquals(server.getPort(), URI.create(server.getJdbcUrl().substring(5)).getPort());
 
             for (String database : server.getDatabases()) {
-                try (Connection connection = DriverManager.getConnection(server.getJdbcUrl())) {
-                    connection.setCatalog(database);
+                try (Connection connection = DriverManager.getConnection(server.getJdbcUrl(database))) {
                     try (Statement statement = connection.createStatement()) {
                         statement.execute("CREATE TABLE test_table (c1 bigint PRIMARY KEY)");
                         statement.execute("INSERT INTO test_table (c1) VALUES (1)");

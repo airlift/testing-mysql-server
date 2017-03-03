@@ -179,4 +179,9 @@ public final class TestingMySqlServer
     {
         return format("jdbc:mysql://localhost:%d?user=%s&password=%s", port, user, password);
     }
+
+    public String getJdbcUrl(String database)
+    {
+        return format("jdbc:mysql://localhost:%d/%s?user=%s&password=%s", port, database, user, password);
+    }
 }
