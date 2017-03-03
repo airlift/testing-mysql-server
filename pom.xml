@@ -4,7 +4,7 @@
     <parent>
         <groupId>io.airlift</groupId>
         <artifactId>airbase</artifactId>
-        <version>24</version>
+        <version>62</version>
     </parent>
 
     <artifactId>testing-mysql-server</artifactId>
@@ -24,6 +24,8 @@
     </scm>
 
     <properties>
+        <air.check.skip-jacoco>true</air.check.skip-jacoco>
+        <air.check.skip-findbugs>true</air.check.skip-findbugs>
         <air.check.skip-pmd>true</air.check.skip-pmd>
 
         <dep.airlift.version>0.93</dep.airlift.version>

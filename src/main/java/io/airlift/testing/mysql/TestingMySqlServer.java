@@ -32,10 +32,10 @@ import java.sql.Statement;
 import java.util.Map;
 import java.util.Set;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static io.airlift.testing.FileUtils.deleteRecursively;
 import static java.lang.String.format;
 import static java.nio.file.Files.createTempDirectory;
+import static java.util.Objects.requireNonNull;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 public final class TestingMySqlServer
@@ -59,9 +59,9 @@ public final class TestingMySqlServer
     public TestingMySqlServer(String user, String password, Iterable<String> databases)
             throws Exception
     {
-        this.user = checkNotNull(user, "user is null");
-        this.password = checkNotNull(password, "password is null");
-        this.databases = ImmutableSet.copyOf(checkNotNull(databases, "databases is null"));
+        this.user = requireNonNull(user, "user is null");
+        this.password = requireNonNull(password, "password is null");
+        this.databases = ImmutableSet.copyOf(requireNonNull(databases, "databases is null"));
         port = randomPort();
 
         mysqlDir = createTempDirectory("testing-mysql-server");
