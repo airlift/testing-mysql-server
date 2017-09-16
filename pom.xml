@@ -8,7 +8,7 @@
     </parent>
 
     <artifactId>testing-mysql-server</artifactId>
-    <version>5.5.9-2-SNAPSHOT</version>
+    <version>5.7.19-1-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>testing-mysql-server</name>
@@ -28,14 +28,21 @@
         <air.check.skip-findbugs>true</air.check.skip-findbugs>
         <air.check.skip-pmd>true</air.check.skip-pmd>
 
-        <dep.airlift.version>0.93</dep.airlift.version>
+        <dep.airlift.version>0.149</dep.airlift.version>
     </properties>
 
     <dependencies>
         <dependency>
             <groupId>mysql</groupId>
-            <artifactId>mysql-connector-mxj</artifactId>
-            <version>5.0.12</version>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>5.1.44</version>
+            <scope>runtime</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>io.airlift</groupId>
+            <artifactId>concurrent</artifactId>
+            <version>${dep.airlift.version}</version>
         </dependency>
 
         <dependency>
@@ -45,14 +52,20 @@
         </dependency>
 
         <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
+            <groupId>io.airlift</groupId>
+            <artifactId>units</artifactId>
+            <version>1.0</version>
         </dependency>
 
         <dependency>
             <groupId>io.airlift</groupId>
-            <artifactId>testing</artifactId>
-            <version>${dep.airlift.version}</version>
+            <artifactId>command</artifactId>
+            <version>0.2</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
         </dependency>
 
         <!--for testing -->
@@ -62,4 +75,31 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>1.6.0</version>
+                <executions>
+                    <execution>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <executable>${basedir}/repack-mysql.sh</executable>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+
+        <resources>
+            <resource>
+                <directory>${project.build.directory}/generated-resources</directory>
+            </resource>
+        </resources>
+    </build>
 </project>

@@ -14,29 +14,17 @@
 package io.airlift.testing.mysql;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import com.mysql.management.MysqldResource;
-import com.mysql.management.MysqldResourceI;
 import io.airlift.log.Logger;
 
 import java.io.Closeable;
-import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.net.ServerSocket;
-import java.nio.file.Path;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.Map;
 import java.util.Set;
 
-import static io.airlift.testing.FileUtils.deleteRecursively;
 import static java.lang.String.format;
-import static java.nio.file.Files.createTempDirectory;
 import static java.util.Objects.requireNonNull;
-import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 public final class TestingMySqlServer
         implements Closeable
@@ -47,8 +35,8 @@ public final class TestingMySqlServer
     private final String password;
     private final Set<String> databases;
     private final int port;
-    private final Path mysqlDir;
-    private final MysqldResource server;
+    private final String version;
+    private final EmbeddedMySql server;
 
     public TestingMySqlServer(String user, String password, String... databases)
             throws Exception
@@ -62,27 +50,12 @@ public final class TestingMySqlServer
         this.user = requireNonNull(user, "user is null");
         this.password = requireNonNull(password, "password is null");
         this.databases = ImmutableSet.copyOf(requireNonNull(databases, "databases is null"));
-        port = randomPort();
 
-        mysqlDir = createTempDirectory("testing-mysql-server");
-        Path dataDir = mysqlDir.resolve("data");
-        server = new MysqldResource(mysqlDir.toFile(), dataDir.toFile());
+        server = new EmbeddedMySql();
+        port = server.getPort();
 
-        Map<String, String> args = ImmutableMap.<String, String>builder()
-                .put(MysqldResourceI.PORT, Integer.toString(port))
-                .put(MysqldResourceI.INITIALIZE_USER, "true")
-                .put(MysqldResourceI.INITIALIZE_USER_NAME, user)
-                .put(MysqldResourceI.INITIALIZE_PASSWORD, password)
-                .build();
-
-        server.start("testing-mysql-server", args);
-
-        if (!server.isRunning()) {
-            close();
-            throw new RuntimeException("MySQL did not start");
-        }
-
-        try (Connection connection = waitForConnection(getJdbcUrl())) {
+        try (Connection connection = server.getMySqlDatabase()) {
+            version = connection.getMetaData().getDatabaseProductVersion();
             for (String database : databases) {
                 try (Statement statement = connection.createStatement()) {
                     execute(statement, format("CREATE DATABASE %s", database));
@@ -98,15 +71,6 @@ public final class TestingMySqlServer
         log.info("MySQL server ready: %s", getJdbcUrl());
     }
 
-    private static int randomPort()
-            throws IOException
-    {
-        try (ServerSocket socket = new ServerSocket()) {
-            socket.bind(new InetSocketAddress(0));
-            return socket.getLocalPort();
-        }
-    }
-
     private static void execute(Statement statement, String sql)
             throws SQLException
     {
@@ -114,45 +78,15 @@ public final class TestingMySqlServer
         statement.execute(sql);
     }
 
-    private static Connection waitForConnection(String jdbcUrl)
-            throws InterruptedException
-    {
-        while (true) {
-            try {
-                return DriverManager.getConnection(jdbcUrl);
-            }
-            catch (SQLException e) {
-                // ignored
-            }
-            log.info("Waiting for MySQL to start at " + jdbcUrl);
-            MILLISECONDS.sleep(10);
-        }
-    }
-
     @Override
     public void close()
     {
-        try {
-            server.shutdown();
-        }
-        finally {
-            deleteRecursively(mysqlDir.toFile());
-        }
-    }
-
-    public boolean isRunning()
-    {
-        return server.isRunning();
-    }
-
-    public boolean isReadyForConnections()
-    {
-        return server.isReadyForConnections();
+        server.close();
     }
 
     public String getMySqlVersion()
     {
-        return server.getVersion();
+        return version;
     }
 
     public String getUser()
@@ -177,11 +111,11 @@ public final class TestingMySqlServer
 
     public String getJdbcUrl()
     {
-        return format("jdbc:mysql://localhost:%d?user=%s&password=%s", port, user, password);
+        return format("jdbc:mysql://localhost:%s?user=%s&password=%s&useSSL=false", port, user, password);
     }
 
     public String getJdbcUrl(String database)
     {
-        return format("jdbc:mysql://localhost:%d/%s?user=%s&password=%s", port, database, user, password);
+        return format("jdbc:mysql://localhost:%s/%s?user=%s&password=%s&useSSL=false", port, database, user, password);
     }
 }
