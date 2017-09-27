@@ -40,6 +40,10 @@ public class TestTestingMySqlServer
             assertEquals(server.getJdbcUrl().substring(0, 5), "jdbc:");
             assertEquals(server.getPort(), URI.create(server.getJdbcUrl().substring(5)).getPort());
 
+            try (Connection connection = DriverManager.getConnection(server.getJdbcUrl())) {
+                assertEquals(connection.getMetaData().getDatabaseProductName(), "MySQL");
+            }
+
             for (String database : server.getDatabases()) {
                 try (Connection connection = DriverManager.getConnection(server.getJdbcUrl(database))) {
                     try (Statement statement = connection.createStatement()) {
@@ -52,6 +56,21 @@ public class TestTestingMySqlServer
                         }
                     }
                 }
+            }
+        }
+    }
+
+    @Test
+    public void testGlobal()
+            throws Exception
+    {
+        try (TestingMySqlServer server = new TestingMySqlServer("testuser", "testpass");
+                Connection connection = DriverManager.getConnection(server.getJdbcUrl())) {
+            assertEquals(connection.getMetaData().getDatabaseProductName(), "MySQL");
+
+            try (Statement statement = connection.createStatement()) {
+                statement.execute("CREATE DATABASE testdb");
+                statement.execute("CREATE TABLE testdb.test_table (id bigint PRIMARY KEY)");
             }
         }
     }

@@ -56,10 +56,11 @@ public final class TestingMySqlServer
 
         try (Connection connection = server.getMySqlDatabase()) {
             version = connection.getMetaData().getDatabaseProductVersion();
-            for (String database : databases) {
-                try (Statement statement = connection.createStatement()) {
+            try (Statement statement = connection.createStatement()) {
+                execute(statement, format("CREATE USER '%s'@'%%' IDENTIFIED BY '%s'", user, password));
+                execute(statement, format("GRANT ALL ON *.* to '%s'@'%%' WITH GRANT OPTION", user));
+                for (String database : databases) {
                     execute(statement, format("CREATE DATABASE %s", database));
-                    execute(statement, format("GRANT ALL ON %s.* TO '%s'@'%%' IDENTIFIED BY '%s'", database, user, password));
                 }
             }
         }
