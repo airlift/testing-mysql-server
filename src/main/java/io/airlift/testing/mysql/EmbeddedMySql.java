@@ -13,6 +13,7 @@
  */
 package io.airlift.testing.mysql;
 
+import com.google.common.io.ByteStreams;
 import io.airlift.command.Command;
 import io.airlift.command.CommandFailedException;
 import io.airlift.log.Logger;
@@ -22,7 +23,6 @@ import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.ProcessBuilder.Redirect;
 import java.net.ServerSocket;
 import java.net.URL;
 import java.nio.file.Path;
@@ -177,10 +177,11 @@ final class EmbeddedMySql
 
         Process process = new ProcessBuilder(args)
                 .redirectErrorStream(true)
-                .redirectOutput(Redirect.INHERIT)
                 .start();
 
         log.info("mysqld started on port %s. Waiting up to %s for startup to finish.", port, STARTUP_WAIT);
+
+        startOutputProcessor(process.getInputStream());
 
         waitForServerStartup(process);
 
@@ -250,6 +251,17 @@ final class EmbeddedMySql
         if (!expression) {
             throw new SQLException(message);
         }
+    }
+
+    private void startOutputProcessor(InputStream in)
+    {
+        executor.execute(() -> {
+            try {
+                ByteStreams.copy(in, System.out);
+            }
+            catch (IOException ignored) {
+            }
+        });
     }
 
     private void system(String... command)
