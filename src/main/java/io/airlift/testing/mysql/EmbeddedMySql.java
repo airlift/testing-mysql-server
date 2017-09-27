@@ -176,6 +176,7 @@ final class EmbeddedMySql
                 "--innodb-flush-method=nosync",
                 "--innodb-flush-log-at-trx-commit=0",
                 "--innodb-doublewrite=0",
+                "--bind-address=localhost",
                 "--lc_messages_dir", serverDirectory.resolve("share").toString(),
                 "--socket", serverDirectory.resolve("mysql.sock").toString(),
                 "--port", String.valueOf(port),
