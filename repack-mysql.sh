@@ -22,7 +22,7 @@ fi
 STRIP=strip
 test -x /usr/local/bin/gstrip && STRIP=/usr/local/bin/gstrip
 
-if ! $STRIP --version | grep "GNU strip"
+if ! $STRIP --version | grep -q "GNU strip"
 then
     echo "GNU strip is required."
     echo "Hint: brew install binutils"
