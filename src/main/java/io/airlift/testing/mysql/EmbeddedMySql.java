@@ -158,7 +158,6 @@ final class EmbeddedMySql
         system(mysqld(),
                 "--no-defaults",
                 "--initialize-insecure",
-                "--skip-sync-frm",
                 "--innodb-flush-method=nosync",
                 "--datadir", dataDir());
     }
@@ -170,9 +169,8 @@ final class EmbeddedMySql
                 mysqld(),
                 "--no-defaults",
                 "--skip-ssl",
-                "--disable-partition-engine-check",
+                "--skip-mysqlx",
                 "--explicit_defaults_for_timestamp",
-                "--skip-sync-frm",
                 "--innodb-flush-method=nosync",
                 "--innodb-flush-log-at-trx-commit=0",
                 "--innodb-doublewrite=0",

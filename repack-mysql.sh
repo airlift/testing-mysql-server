@@ -2,8 +2,8 @@
 
 set -eu
 
-VERSION=5.7.22
-BASEURL="https://dev.mysql.com/get/Downloads/MySQL-5.7"
+VERSION=8.0.12
+BASEURL="https://dev.mysql.com/get/Downloads/MySQL-8.0"
 
 LINUX_BASE=mysql-$VERSION-linux-glibc2.12-x86_64
 OSX_BASE=mysql-$VERSION-macos10.13-x86_64
@@ -37,7 +37,7 @@ RESOURCES=target/generated-resources
 
 mkdir -p dist $RESOURCES
 
-LINUX_NAME=$LINUX_BASE.tar.gz
+LINUX_NAME=$LINUX_BASE.tar.xz
 LINUX_DIST=dist/$LINUX_NAME
 
 OSX_NAME=$OSX_BASE.tar.gz
@@ -47,32 +47,38 @@ test -e $LINUX_DIST || curl -L -o $LINUX_DIST "$BASEURL/$LINUX_NAME"
 test -e $OSX_DIST || curl -L -o $OSX_DIST "$BASEURL/$OSX_NAME"
 
 PACKDIR=$(mktemp -d "${TMPDIR:-/tmp}/mysql.XXXXXXXXXX")
-tar -xzf $LINUX_DIST -C $PACKDIR
+$TAR -xf $LINUX_DIST -C $PACKDIR
 pushd $PACKDIR/$LINUX_BASE
 $STRIP bin/mysqld
 $TAR -czf $OLDPWD/$RESOURCES/mysql-Linux-amd64.tar.gz \
-  COPYING \
+  LICENSE \
   README \
   docs/INFO* \
   share/*.sql \
   share/*.txt \
   share/charsets \
   share/english \
+  lib/plugin/validate_password.* \
+  lib/libcrypto.* \
+  lib/libssl.* \
   bin/mysqld
 popd
 rm -rf $PACKDIR
 
 PACKDIR=$(mktemp -d "${TMPDIR:-/tmp}/mysql.XXXXXXXXXX")
-tar -xzf $OSX_DIST -C $PACKDIR
+$TAR -xf $OSX_DIST -C $PACKDIR
 pushd $PACKDIR/$OSX_BASE
 $TAR -czf $OLDPWD/$RESOURCES/mysql-Mac_OS_X-x86_64.tar.gz \
-  COPYING \
+  LICENSE \
   README \
   docs/INFO* \
   share/*.sql \
   share/*.txt \
   share/charsets \
   share/english \
+  lib/plugin/validate_password.* \
+  lib/libcrypto.* \
+  lib/libssl.* \
   bin/mysqld
 popd
 rm -rf $PACKDIR

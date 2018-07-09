@@ -112,11 +112,11 @@ public final class TestingMySqlServer
 
     public String getJdbcUrl()
     {
-        return format("jdbc:mysql://localhost:%s?user=%s&password=%s&useSSL=false", port, user, password);
+        return getJdbcUrl("");
     }
 
     public String getJdbcUrl(String database)
     {
-        return format("jdbc:mysql://localhost:%s/%s?user=%s&password=%s&useSSL=false", port, database, user, password);
+        return format("jdbc:mysql://localhost:%s/%s?user=%s&password=%s&useSSL=false&allowPublicKeyRetrieval=true", port, database, user, password);
     }
 }
