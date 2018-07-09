@@ -9,7 +9,7 @@ LINUX_BASE=mysql-$VERSION-linux-glibc2.12-x86_64
 OSX_BASE=mysql-$VERSION-macos10.12-x86_64
 
 TAR=tar
-test -x /usr/local/bin/gtar && TAR=/usr/local/bin/gtar
+command -v gtar >/dev/null && TAR=gtar
 
 if ! $TAR --version | grep -q "GNU tar"
 then
@@ -20,7 +20,7 @@ then
 fi
 
 STRIP=strip
-test -x /usr/local/bin/gstrip && STRIP=/usr/local/bin/gstrip
+command -v gstrip >/dev/null && STRIP=gstrip
 
 if ! $STRIP --version | grep -q "GNU strip"
 then
