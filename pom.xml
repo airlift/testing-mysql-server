@@ -8,7 +8,7 @@
     </parent>
 
     <artifactId>testing-mysql-server</artifactId>
-    <version>5.7.19-4-SNAPSHOT</version>
+    <version>5.7.22-1-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>testing-mysql-server</name>

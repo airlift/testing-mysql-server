@@ -2,11 +2,11 @@
 
 set -eu
 
-VERSION=5.7.19
+VERSION=5.7.22
 BASEURL="https://dev.mysql.com/get/Downloads/MySQL-5.7"
 
 LINUX_BASE=mysql-$VERSION-linux-glibc2.12-x86_64
-OSX_BASE=mysql-$VERSION-macos10.12-x86_64
+OSX_BASE=mysql-$VERSION-macos10.13-x86_64
 
 TAR=tar
 command -v gtar >/dev/null && TAR=gtar
