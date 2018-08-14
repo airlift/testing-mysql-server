@@ -58,7 +58,6 @@ $TAR -czf $OLDPWD/$RESOURCES/mysql-Linux-amd64.tar.gz \
   share/*.txt \
   share/charsets \
   share/english \
-  lib/plugin/validate_password.* \
   lib/libcrypto.* \
   lib/libssl.* \
   bin/mysqld
@@ -76,7 +75,6 @@ $TAR -czf $OLDPWD/$RESOURCES/mysql-Mac_OS_X-x86_64.tar.gz \
   share/*.txt \
   share/charsets \
   share/english \
-  lib/plugin/validate_password.* \
   lib/libcrypto.* \
   lib/libssl.* \
   bin/mysqld
