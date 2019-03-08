@@ -60,6 +60,8 @@ $TAR -czf $OLDPWD/$RESOURCES/mysql-Linux-amd64.tar.gz \
   share/english \
   lib/libcrypto.* \
   lib/libssl.* \
+  bin/libcrypto.* \
+  bin/libssl.* \
   bin/mysqld
 popd
 rm -rf $PACKDIR
