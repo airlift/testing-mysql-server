@@ -170,6 +170,7 @@ final class EmbeddedMySql
                 "--no-defaults",
                 "--skip-ssl",
                 "--skip-mysqlx",
+                "--default-time-zone=+00:00",
                 "--innodb-flush-method=nosync",
                 "--innodb-flush-log-at-trx-commit=0",
                 "--innodb-doublewrite=0",
