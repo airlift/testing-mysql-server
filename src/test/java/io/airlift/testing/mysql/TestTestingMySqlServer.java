@@ -33,7 +33,7 @@ public class TestTestingMySqlServer
             throws Exception
     {
         try (TestingMySqlServer server = new TestingMySqlServer("testuser", "testpass", "db1", "db2")) {
-            assertEquals(server.getMySqlVersion(), "8.0.12");
+            assertEquals(server.getMySqlVersion(), "8.0.15");
             assertEquals(server.getDatabases(), ImmutableSet.of("db1", "db2"));
             assertEquals(server.getUser(), "testuser");
             assertEquals(server.getPassword(), "testpass");
