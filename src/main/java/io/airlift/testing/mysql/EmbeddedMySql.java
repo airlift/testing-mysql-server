@@ -47,9 +47,9 @@ import static java.lang.String.format;
 import static java.nio.file.Files.copy;
 import static java.nio.file.Files.createTempDirectory;
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
+import static java.util.Objects.requireNonNull;
 import static java.util.concurrent.Executors.newCachedThreadPool;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
-import static java.util.concurrent.TimeUnit.SECONDS;
 
 final class EmbeddedMySql
         implements Closeable
@@ -58,19 +58,23 @@ final class EmbeddedMySql
 
     private static final String JDBC_FORMAT = "jdbc:mysql://localhost:%s/%s?user=%s&useSSL=false";
 
-    private static final Duration STARTUP_WAIT = new Duration(10, SECONDS);
-    private static final Duration SHUTDOWN_WAIT = new Duration(10, SECONDS);
-    private static final Duration COMMAND_TIMEOUT = new Duration(30, SECONDS);
-
     private final ExecutorService executor = newCachedThreadPool(daemonThreadsNamed("testing-mysql-server-%s"));
     private final Path serverDirectory;
     private final int port = randomPort();
     private final AtomicBoolean closed = new AtomicBoolean();
     private final Process mysqld;
 
-    public EmbeddedMySql()
+    private final Duration startupWait;
+    private final Duration shutdownWait;
+    private final Duration commandTimeout;
+
+    public EmbeddedMySql(MySqlOptions mySqlOptions)
             throws IOException
     {
+        this.startupWait = requireNonNull(mySqlOptions.getStartupWait(), "startupWait is null");
+        this.shutdownWait = requireNonNull(mySqlOptions.getShutdownWait(), "shutdownWait is null");
+        this.commandTimeout = requireNonNull(mySqlOptions.getCommandTimeout(), "commandTimeout is null");
+
         serverDirectory = createTempDirectory("testing-mysql-server");
 
         log.info("Starting MySQL server in %s", serverDirectory);
@@ -110,12 +114,12 @@ final class EmbeddedMySql
         }
 
         if (mysqld != null) {
-            log.info("Shutting down mysqld. Waiting up to %s for shutdown to finish.", STARTUP_WAIT);
+            log.info("Shutting down mysqld. Waiting up to %s for shutdown to finish.", startupWait);
 
             mysqld.destroyForcibly();
 
             try {
-                mysqld.waitFor(SHUTDOWN_WAIT.toMillis(), MILLISECONDS);
+                mysqld.waitFor(shutdownWait.toMillis(), MILLISECONDS);
             }
             catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
@@ -184,7 +188,7 @@ final class EmbeddedMySql
                 .redirectErrorStream(true)
                 .start();
 
-        log.info("mysqld started on port %s. Waiting up to %s for startup to finish.", port, STARTUP_WAIT);
+        log.info("mysqld started on port %s. Waiting up to %s for startup to finish.", port, startupWait);
 
         startOutputProcessor(process.getInputStream());
 
@@ -208,7 +212,7 @@ final class EmbeddedMySql
     {
         Throwable lastCause = null;
         long start = System.nanoTime();
-        while (Duration.nanosSince(start).compareTo(STARTUP_WAIT) <= 0) {
+        while (Duration.nanosSince(start).compareTo(startupWait) <= 0) {
             try {
                 checkReady();
                 log.info("mysqld startup finished");
@@ -235,7 +239,7 @@ final class EmbeddedMySql
                 return;
             }
         }
-        throw new IOException("mysqld failed to start after " + STARTUP_WAIT, lastCause);
+        throw new IOException("mysqld failed to start after " + startupWait, lastCause);
     }
 
     private void checkReady()
@@ -273,7 +277,7 @@ final class EmbeddedMySql
     {
         try {
             new Command(command)
-                    .setTimeLimit(COMMAND_TIMEOUT)
+                    .setTimeLimit(commandTimeout)
                     .execute(executor);
         }
         catch (CommandFailedException e) {
