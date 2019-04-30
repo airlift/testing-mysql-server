@@ -47,11 +47,17 @@ public final class TestingMySqlServer
     public TestingMySqlServer(String user, String password, Iterable<String> databases)
             throws Exception
     {
+        this(user, password, databases, MySqlOptions.builder().build());
+    }
+
+    public TestingMySqlServer(String user, String password, Iterable<String> databases, MySqlOptions mySqlOptions)
+            throws Exception
+    {
         this.user = requireNonNull(user, "user is null");
         this.password = requireNonNull(password, "password is null");
         this.databases = ImmutableSet.copyOf(requireNonNull(databases, "databases is null"));
 
-        server = new EmbeddedMySql();
+        server = new EmbeddedMySql(mySqlOptions);
         port = server.getPort();
 
         try (Connection connection = server.getMySqlDatabase()) {
