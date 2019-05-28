@@ -57,19 +57,22 @@ public class MySqlOptions
         private Duration shutdownWait = new Duration(10, SECONDS);
         private Duration commandTimeout = new Duration(30, SECONDS);
 
-        public void setStartupWait(Duration startupWait)
+        public Builder setStartupWait(Duration startupWait)
         {
             this.startupWait = requireNonNull(startupWait, "startupWait is null");
+            return this;
         }
 
-        public void setShutdownWait(Duration shutdownWait)
+        public Builder setShutdownWait(Duration shutdownWait)
         {
             this.shutdownWait = requireNonNull(shutdownWait, "shutdownWait is null");
+            return this;
         }
 
-        public void setCommandTimeout(Duration commandTimeout)
+        public Builder setCommandTimeout(Duration commandTimeout)
         {
             this.commandTimeout = requireNonNull(commandTimeout, "commandTimeout is null");
+            return this;
         }
 
         public MySqlOptions build()
